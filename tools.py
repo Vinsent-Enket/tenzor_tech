@@ -5,8 +5,17 @@ import psycopg2
 
 
 class SQLTools:
+    """
+    Класс по работе с базой данных, его методы ничего не возвращают, все данные либо выводятся принтом,
+    либо к ним можно получить доступ как к аттрибутам
+    Для лучшего понимания представьте методы как кнопки
+    """
 
     def __init__(self, data_base_url):
+        """
+        При инициализации нужно получить адрес базы данных (указывается в файле settings)
+        :param data_base_url:
+        """
         self.cursor = None
         self.connect = None
         self.is_ok = False
@@ -16,6 +25,12 @@ class SQLTools:
         self.data_base_url = data_base_url
 
     def connected(self):
+        """
+        Подключается к базе данных указанной при создании
+        Если все успешно ставит статус is_ok который дает доступ к другим функциям
+        Статус используется вне класса, чтобы например при наличии графического интерфейса включать/выключать окна меню
+        :return:
+        """
         try:
             self.connect = psycopg2.connect(self.data_base_url)
             self.cursor = self.connect.cursor()
@@ -28,13 +43,17 @@ class SQLTools:
                   'Проверьте работоспособность базы и повторите попытку \n')
 
     def connection_close(self):
+        """
+        Ручное закрытие подключения к базе
+        :return:
+        """
         self.connect.close()
         self.is_ok = False
 
     def json_loader(self, file):
         """
-        Принимает местоположение файла, считывает его и возвращает
-        Если файл не найден, возвращает None блокируя дальнейшие шаги
+        Принимает местоположение файла, считывает его, ищет в своей директории и возвращает
+        принтом прочитанные данные
         :param file:
         :return:
         """
@@ -48,6 +67,10 @@ class SQLTools:
             print("Файла не существует \n")
 
     def table_creator(self):
+        """
+        Создает таблицу и выдает принтом статус операции
+        :return:
+        """
         try:
             create_table_query = """CREATE TABLE subordination
                                       (ID INT   PRIMARY KEY     NOT NULL,
@@ -65,6 +88,11 @@ class SQLTools:
             print('Ошибка: Таблица уже существует \n')
 
     def table_seeder(self):
+        """
+        Заполняет прочитанными ранее данными
+        Если запись уже присутствует в таблице или запись не подходит к таблице, пропускает итерацию
+        :return:
+        """
         print("_-_-_Сообщение из SQLTools_-_-_")
         for data in self.data_to_seed:
             try:
@@ -84,6 +112,17 @@ class SQLTools:
                 continue
 
     def search(self, employer_id):
+        """
+        Использованы 2 рекурсивные функции
+        Первая ищет главного родителя с type=1 (в данном случае офис)
+        Вторая используя айди офиса находит все дочерние элементы с type=3 (в данном случае сотрудников)
+        Как итог, записывает названия и выводит через принт
+
+        Недостаток в том, что при вводе айди отдела или подотдела так же выведет сотрудников,
+        отдельный запрос под проверку выделять не стал
+        :param employer_id:
+        :return:
+        """
         selecting_office = """WITH RECURSIVE r1 AS (
                        SELECT 
                          id, 
@@ -112,7 +151,6 @@ class SQLTools:
         data = self.cursor.fetchone()
         office_id = data[0]
         self.office_name = data[1]
-        print(office_id)
         selecting_employees = """
                                  WITH RECURSIVE r2 AS (
                                  SELECT 

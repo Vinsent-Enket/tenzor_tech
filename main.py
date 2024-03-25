@@ -1,14 +1,14 @@
-# This is a sample Python script.
-import keyboard
-
 from settings import DATA_BASE_URL
 from tools import SQLTools
 
 
-# Press R to execute it or replace it with your code.
-# Press Double  to search everywhere for classes, files, tool windows, actions, and settings.
-
-def sql_tools():
+def intetface():
+    """
+    Консольный интерфейс
+    В зависимости от надобности в блок со статусом подключения можно добавить еще пунктов
+    Большинство пунктов смогут отработать только после подключения к базе и предыдущего пункта
+    :return:
+    """
     print("Вас приветствует SQLTools")
     base = SQLTools(
         data_base_url=DATA_BASE_URL
@@ -44,7 +44,7 @@ def sql_tools():
                                 "---> ")
             base.json_loader(user_choice)
         elif user_choice == '4':
-            if base.data_to_seed:
+            if base.data_to_seed:  # отрабатывает только если есть подготовленные данные
                 base.table_seeder()
             else:
                 print(">>>Данные для таблицы не подготовлены<<<")
@@ -54,8 +54,8 @@ def sql_tools():
                                     "---> ")
                 try:
                     base.search(int(user_choice))
-                except TypeError:
-                    print("Ошибка ввода id")
+                except TypeError:  # если было введено не число не допускает запуск выборки
+                    print("Ошибка ввода id \n")
             else:
                 print("Вы не подключены к базе \n")
 
@@ -66,12 +66,14 @@ def sql_tools():
                 print("Вы не подключены к базе \n")
         elif user_choice == '7':
             print("До свидания! ")
+            base.connection_close()
             break
         else:
             print("Команда не распознана, попробуйте снова \n")
 
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    sql_tools()
+    intetface()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
